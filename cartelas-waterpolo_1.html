@@ -101,6 +101,30 @@
   .pips{display:flex;gap:clamp(8px,1.4vmin,16px)}
   .pip{width:clamp(14px,2.2vmin,26px);height:clamp(14px,2.2vmin,26px);border-radius:50%;border:2px solid var(--bronze-2);background:transparent}
   .pip.done{background:linear-gradient(160deg,var(--bronze-2),var(--bronze-1));border-color:var(--bronze-1)}
+  .qpartials{display:flex;gap:clamp(10px,2.2vmin,26px);margin-top:.2vmin}
+  .qp-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .qp-q{font-family:"Barlow Condensed";font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:clamp(10px,1.5vmin,14px);color:rgba(12,39,52,.5)}
+  .qp-v{font-family:"Oswald";font-weight:700;font-size:clamp(15px,2.4vmin,24px);color:var(--ink);font-variant-numeric:tabular-nums}
+
+  /* ---- resumen de jugadores en descanso (lados de pantalla) ---- */
+  .dr-panel{position:absolute;top:50%;transform:translateY(-50%);width:clamp(150px,18vw,260px);
+    display:none;flex-direction:column;gap:7px;z-index:3}
+  .dr-panel.show{display:flex}
+  .dr-panel--l{left:clamp(18px,4vw,56px)}
+  .dr-panel--v{right:clamp(18px,4vw,56px)}
+  .dr-head{font-family:"Barlow Condensed";font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    font-size:clamp(11px,1.7vmin,16px);color:var(--bronze-1)}
+  .dr-panel--v .dr-head{text-align:right}
+  .dr-rows{display:flex;flex-direction:column;gap:5px}
+  .dr-row{display:flex;align-items:center;gap:7px;font-family:"Barlow";font-weight:500;
+    font-size:clamp(11px,1.6vmin,15px);color:var(--ink)}
+  .dr-panel--v .dr-row{flex-direction:row-reverse}
+  .dr-goals{flex:0 0 auto;min-width:1.7em;height:1.7em;border-radius:50%;display:grid;place-items:center;
+    font-family:"Oswald";font-weight:700;font-size:.82em;color:#3a2208;
+    background:linear-gradient(160deg,var(--bronze-hi),var(--bronze-2))}
+  .dr-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dr-dots{flex:0 0 auto;display:flex;gap:2px}
+  .dr-dots span{width:6px;height:6px;border-radius:50%;background:#c0392b;display:inline-block}
 
   /* ===== CIERRE ===== */
   .cierre__inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.6vmin,32px);padding:5vmin;max-width:92%}
@@ -141,7 +165,7 @@
   body.role-control{background:#0a141b;overflow:auto}
   .ctl{display:none}
   body.role-control .stage{display:none}
-  body.role-control .ctl{display:flex;flex-direction:column;gap:16px;padding:18px;max-width:780px;margin:0 auto;color:#e7f1f5}
+  body.role-control .ctl{display:flex;flex-direction:column;gap:16px;padding:18px;max-width:1180px;margin:0 auto;color:#e7f1f5}
   .ctl__bar{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#9fc0cf}
   .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#c0392b;margin-right:6px;vertical-align:middle}
   .dot.on{background:#2ecc71}
@@ -174,15 +198,15 @@
   .ros-head b{font-family:"Oswald";font-size:15px;letter-spacing:.04em;color:#e7f1f5}
   .ros-filter{font:inherit;font-size:11px;cursor:pointer;border:0;border-radius:999px;padding:6px 10px;background:#16323f;color:#9fc0cf;white-space:nowrap}
   .ros-filter.active{background:var(--bronze-2);color:#221200}
-  .ros-list{display:flex;flex-direction:column;gap:6px;max-height:48vh;overflow:auto}
-  .ros-row{display:flex;align-items:center;gap:6px;background:#11272f;border-radius:10px;padding:6px 8px}
-  .ros-dorsal{width:2.4em;flex:0 0 auto;text-align:center;font:inherit;font-weight:700;font-size:13px;border:0;border-radius:8px;padding:6px 0;background:#0a1a20;color:#fff}
+  .ros-list{display:flex;flex-direction:column;gap:8px}
+  .ros-row{display:flex;align-items:center;gap:10px;background:#11272f;border-radius:11px;padding:9px 12px}
+  .ros-dorsal{width:2.6em;flex:0 0 auto;text-align:center;font:inherit;font-weight:700;font-size:15px;border:0;border-radius:8px;padding:9px 0;background:#0a1a20;color:#fff}
   .ros-dorsal::placeholder{color:#3f5a64}
-  .ros-name{flex:1;min-width:0;font-size:12.5px;color:#dbe9ef;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .ros-dots{flex:0 0 auto;display:flex;gap:2px;width:18px}
+  .ros-name{flex:1;min-width:0;font-size:14.5px;color:#dbe9ef;line-height:1.25;white-space:normal}
+  .ros-dots{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:2px;width:20px}
   .dot-exp{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e74c3c}
-  .ros-btns{display:flex;gap:4px;flex:0 0 auto}
-  .ros-btns button{font:inherit;font-weight:700;font-size:10.5px;letter-spacing:.02em;cursor:pointer;border:0;border-radius:7px;padding:7px 7px;color:#fff;background:#1d3d4a}
+  .ros-btns{display:flex;gap:6px;flex:0 0 auto}
+  .ros-btns button{font:inherit;font-weight:700;font-size:12px;letter-spacing:.02em;cursor:pointer;border:0;border-radius:8px;padding:9px 11px;color:#fff;background:#1d3d4a}
   .ros-btns button[data-rosev="gol"]{background:var(--bronze-2);color:#221200}
   .ros-btns button[data-rosev="exp"]{background:#7a2d2d}
   .ros-btns button[data-rosev="pen"]{background:#264f7a}
@@ -230,6 +254,8 @@
     <!-- DESCANSO -->
     <section class="cartela descanso">
       <div class="frame"></div>
+      <div class="dr-panel dr-panel--l" id="dr-l"><p class="dr-head" id="dr-l-head"></p><div class="dr-rows" id="dr-l-rows"></div></div>
+      <div class="dr-panel dr-panel--v" id="dr-v"><p class="dr-head" id="dr-v-head"></p><div class="dr-rows" id="dr-v-rows"></div></div>
       <div class="descanso__inner">
         <p class="eyebrow">Descanso</p>
         <div class="scoreline">
@@ -237,7 +263,11 @@
           <div class="score"><span class="score__num" id="d-score-l">0</span><span class="score__dash">–</span><span class="score__num" id="d-score-v">0</span></div>
           <div class="team team--visitor"><div class="crest" id="d-crest-v"></div><p class="team__name" id="d-name-v"></p></div>
         </div>
-        <div class="quarter"><p class="quarter__label">Cuarto <span id="d-q">1</span></p><div class="pips" id="d-pips"></div></div>
+        <div class="quarter">
+          <p class="quarter__label">Cuarto <span id="d-q">1</span></p>
+          <div class="pips" id="d-pips"></div>
+          <div class="qpartials" id="d-qpartials"></div>
+        </div>
       </div>
     </section>
 
@@ -324,12 +354,29 @@
   if(cfg.lc) document.documentElement.style.setProperty("--local", cfg.lc);
   if(cfg.vc) document.documentElement.style.setProperty("--visitor", cfg.vc);
 
+  // Convocados (nombre + primer apellido). Jerez = local, Caballa = visitante.
+  var ROSTER_L=["Alberto Miras","Alejandro Garcia","Alfredo Alguacil","Antonio Sanchez","Fernando Espinosa",
+    "Guillermo Marquez","Hector Parro","Ignacio Martin","Javier Salguero","Mariano Gomez",
+    "Miguel Angel Zafra","Miguel Mateos","Miguel Pinto","Pedro Zayas","Pepe De Los Santos",
+    "Rodrigo Ruiz","Samuel Mera","Victor Ruiz","Yago Sanchez"];
+  var ROSTER_V=["Adam El Hachmi","Adan Gonzalez","Alvaro Marin","Ismael Merabet","Jorge Pinazo",
+    "Jose Manuel Cabrera","Luis Guerra","Marco Postigo","Mario Jimenez","Nacho Rodriguez",
+    "Nel López","Nicolas Rodriguez","Nicolas Fernandez","Pablo Canton","Pablo Figueroa",
+    "Rafael Angel Perez","Raul Garcia","Simon Miguel Mari"];
+  var rosterState = {
+    l: ROSTER_L.map(function(n){ return {name:n, dorsal:"", goals:0, exp:0}; }),
+    v: ROSTER_V.map(function(n){ return {name:n, dorsal:"", goals:0, exp:0}; })
+  };
+  var rosterFilter = { l:false, v:false };
+
   // estado compartido por el canal
   var state = {
     view: val("view","entrada"),
     ls: parseInt(val("ls","0"),10)||0,
     vs: parseInt(val("vs","0"),10)||0,
-    q:  Math.min(4,Math.max(1, parseInt(val("q","1"),10)||1))
+    q:  Math.min(4,Math.max(1, parseInt(val("q","1"),10)||1)),
+    qp: [null,null,null,null],   // parciales ya cerrados de cuartos anteriores {l,v}
+    qsl: 0, qsv: 0                // marcador al empezar el cuarto actual (línea base)
   };
 
   // ---- pintar contenido estático del overlay ----
@@ -358,14 +405,33 @@
            '<span class="ft-num'+(winner==="v"?" win":"")+'">'+state.vs+'</span> '+
            '<span'+(winner==="v"?' class="win"':'')+'>'+esc(cfg.vshort)+'</span>';
   }
+  function quarterPartialsDisplay(){
+    var out=[];
+    for(var i=0;i<4;i++){
+      if(i===state.q-1) out.push({l:state.ls-state.qsl, v:state.vs-state.qsv});
+      else if(i<state.q-1) out.push(state.qp[i]||null);
+      else out.push(null);
+    }
+    return out;
+  }
   function applyState(){
     document.body.setAttribute("data-view", state.view);
     setText("sb-ls",state.ls); setText("sb-vs",state.vs); setText("sb-q","C"+state.q);
     setText("d-score-l",state.ls); setText("d-score-v",state.vs); setText("d-q",state.q);
     var pips=byId("d-pips"); pips.innerHTML="";
     for(var i=1;i<=4;i++){var dt=document.createElement("span");dt.className="pip"+(i<=state.q?" done":"");pips.appendChild(dt);}
+    var qpEl=byId("d-qpartials");
+    if(qpEl){
+      var disp=quarterPartialsDisplay(), html="";
+      for(var j=0;j<4;j++){
+        var v=disp[j], txt = v ? (v.l+"-"+v.v) : "–";
+        html += '<div class="qp-cell"><span class="qp-q">C'+(j+1)+'</span><span class="qp-v">'+txt+'</span></div>';
+      }
+      qpEl.innerHTML=html;
+    }
     byId("w-score").innerHTML=finalScoreHTML("l");
     byId("l-score").innerHTML=finalScoreHTML("v");
+    renderDescansoRoster();
   }
   applyState();
 
@@ -381,6 +447,7 @@
   // ================= CANAL EN TIEMPO REAL (MQTT/WSS) =================
   var topic = "wp/"+cfg.match+"/state";
   var eventTopic = "wp/"+cfg.match+"/event";
+  var rosterTopic = "wp/"+cfg.match+"/roster";
   var clientId = cfg.role+"-"+Math.random().toString(16).slice(2,8);
   var client=null, connected=false, userTouched=false;
 
@@ -389,17 +456,26 @@
 
   function publish(){
     if(!client||!connected) return;
-    var msg=JSON.stringify({view:state.view,ls:state.ls,vs:state.vs,q:state.q,cid:clientId,ts:Date.now()});
+    var msg=JSON.stringify({view:state.view,ls:state.ls,vs:state.vs,q:state.q,qp:state.qp,qsl:state.qsl,qsv:state.qsv,cid:clientId,ts:Date.now()});
     client.publish(topic, msg, {qos:0, retain:true});
   }
   function publishEvent(team,text,dur){
     if(!client||!connected) return;
     client.publish(eventTopic, JSON.stringify({team:team,text:text,dur:dur,cid:clientId,ts:Date.now()}), {qos:0, retain:false});
   }
+  function publishRoster(){
+    if(!client||!connected) return;
+    var payload = {
+      l: rosterState.l.map(function(p){ return {d:p.dorsal,g:p.goals,e:p.exp}; }),
+      v: rosterState.v.map(function(p){ return {d:p.dorsal,g:p.goals,e:p.exp}; }),
+      cid:clientId, ts:Date.now()
+    };
+    client.publish(rosterTopic, JSON.stringify(payload), {qos:0, retain:true});
+  }
 
   if(typeof mqtt!=="undefined"){
     client=mqtt.connect(cfg.broker,{clientId:clientId,reconnectPeriod:2500,connectTimeout:9000,clean:true});
-    client.on("connect",function(){ setStatus(true); client.subscribe([topic,eventTopic],{qos:0}); });
+    client.on("connect",function(){ setStatus(true); client.subscribe([topic,eventTopic,rosterTopic],{qos:0}); });
     client.on("reconnect",function(){ /* reintentando */ });
     client.on("close",function(){ setStatus(false); });
     client.on("error",function(){ setStatus(false); });
@@ -407,8 +483,17 @@
       var s; try{ s=JSON.parse(payload.toString()); }catch(e){ return; }
       if(s.cid===clientId) return;            // ignora ecos propios
       if(t===eventTopic){ if(cfg.role!=="control") showEvent(s.team,s.text,s.dur); return; }
+      if(t===rosterTopic){
+        if(cfg.role!=="control"){
+          if(s.l) s.l.forEach(function(o,i){ if(rosterState.l[i]){ rosterState.l[i].dorsal=o.d||""; rosterState.l[i].goals=o.g||0; rosterState.l[i].exp=o.e||0; } });
+          if(s.v) s.v.forEach(function(o,i){ if(rosterState.v[i]){ rosterState.v[i].dorsal=o.d||""; rosterState.v[i].goals=o.g||0; rosterState.v[i].exp=o.e||0; } });
+          renderDescansoRoster();
+        }
+        return;
+      }
       if(cfg.role==="control" && userTouched) return; // el mando manda
       state.view=s.view; state.ls=s.ls; state.vs=s.vs; state.q=s.q;
+      state.qp=s.qp||[null,null,null,null]; state.qsl=s.qsl||0; state.qsv=s.qsv||0;
       applyState();
       if(cfg.role==="control") reflectControl();
     });
@@ -417,20 +502,6 @@
   // ================= PANEL DE CONTROL (iPad) =================
   var VIEWS=[["entrada","Entrada"],["juego","En juego"],["descanso","Descanso"],["victoria","Victoria"],["derrota","Derrota"]];
 
-  // Convocados (nombre + primer apellido). Jerez = local, Caballa = visitante.
-  var ROSTER_L=["Alberto Miras","Alejandro Garcia","Alfredo Alguacil","Antonio Sanchez","Fernando Espinosa",
-    "Guillermo Marquez","Hector Parro","Ignacio Martin","Javier Salguero","Mariano Gomez",
-    "Miguel Angel Zafra","Miguel Mateos","Miguel Pinto","Pedro Zayas","Pepe De Los Santos",
-    "Rodrigo Ruiz","Samuel Mera","Victor Ruiz","Yago Sanchez"];
-  var ROSTER_V=["Adam El Hachmi","Adan Gonzalez","Alvaro Marin","Ismael Merabet","Jorge Pinazo",
-    "Jose Manuel Cabrera","Luis Guerra","Marco Postigo","Mario Jimenez","Nacho Rodriguez",
-    "Nel López","Nicolas Rodriguez","Nicolas Fernandez","Pablo Canton","Pablo Figueroa",
-    "Rafael Angel Perez","Raul Garcia","Simon Miguel Mari"];
-  var rosterState = {
-    l: ROSTER_L.map(function(n){ return {name:n, dorsal:"", exp:0}; }),
-    v: ROSTER_V.map(function(n){ return {name:n, dorsal:"", exp:0}; })
-  };
-  var rosterFilter = { l:false, v:false };
   function rosterRow(side, idx, name){
     return '<div class="ros-row">'+
       '<input class="ros-dorsal" type="text" inputmode="numeric" maxlength="2" placeholder="–" data-role="dorsal" data-side="'+side+'" data-idx="'+idx+'">'+
@@ -466,6 +537,24 @@
       row.style.display = (rosterFilter[side] && !p.dorsal) ? "none" : "";
     });
   }
+  function renderDRSide(side, headLabel){
+    var panel=byId("dr-"+side), rowsEl=byId("dr-"+side+"-rows"), headEl=byId("dr-"+side+"-head");
+    if(!panel||!rowsEl) return;
+    var arr = rosterState[side].filter(function(p){ return p.goals>0 || p.exp>0; })
+      .slice().sort(function(a,b){ return (b.goals-a.goals)||(b.exp-a.exp); });
+    if(!arr.length){ panel.classList.remove("show"); rowsEl.innerHTML=""; return; }
+    if(headEl) headEl.textContent=headLabel;
+    rowsEl.innerHTML = arr.map(function(p){
+      var dots=""; for(var i=0;i<p.exp;i++) dots+='<span></span>';
+      var tag = p.dorsal ? ("#"+p.dorsal+" ") : "";
+      return '<div class="dr-row"><span class="dr-goals">'+p.goals+'</span><span class="dr-name">'+tag+esc(p.name)+'</span><span class="dr-dots">'+dots+'</span></div>';
+    }).join("");
+    panel.classList.add("show");
+  }
+  function renderDescansoRoster(){
+    renderDRSide("l", cfg.lrosterhead);
+    renderDRSide("v", cfg.vshort);
+  }
 
   function reflectControl(){
     document.querySelectorAll(".views button").forEach(function(b){ b.classList.toggle("active", b.dataset.v===state.view); });
@@ -495,7 +584,14 @@
     byId("ctl").addEventListener("click",function(e){
       var t=e.target;
       if(t.dataset.v){ userTouched=true; state.view=t.dataset.v; commit(); }
-      else if(t.dataset.q){ userTouched=true; state.q=parseInt(t.dataset.q,10); commit(); }
+      else if(t.dataset.q){
+        userTouched=true; var newQ=parseInt(t.dataset.q,10);
+        if(newQ!==state.q){
+          state.qp[state.q-1] = { l: state.ls-state.qsl, v: state.vs-state.qsv };
+          state.qsl = state.ls; state.qsv = state.vs;
+        }
+        state.q=newQ; commit();
+      }
       else if(t.dataset.a){ userTouched=true; var a=t.dataset.a;
         if(a==="l+")state.ls++; if(a==="l-")state.ls=Math.max(0,state.ls-1);
         if(a==="v+")state.vs++; if(a==="v-")state.vs=Math.max(0,state.vs-1); commit(); }
@@ -509,11 +605,14 @@
         var tag=pl.dorsal?("#"+pl.dorsal+" "):"";
         if(t.dataset.rosev==="gol"){
           userTouched=true;
+          pl.goals++;
           if(rside==="l") state.ls++; else state.vs++;
           commit();
+          publishRoster(); renderDescansoRoster();
           publishEvent(rside, tag+pl.name+" — ¡Gol!", 6);
         } else if(t.dataset.rosev==="exp"){
           pl.exp++; renderDots(rside,ridx);
+          publishRoster(); renderDescansoRoster();
           publishEvent(rside, tag+pl.name+" — Expulsión", 6);
         } else if(t.dataset.rosev==="pen"){
           publishEvent(rside, tag+pl.name+" — Penalti", 6);
