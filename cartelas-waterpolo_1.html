@@ -64,6 +64,7 @@
   @keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(2%,-2%,0) scale(1.06)}}
   .entrada__inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(18px,3.4vmin,46px);padding:5vmin}
   .entrada .eyebrow{color:var(--cyan-bright);opacity:0;animation:fadeDown .7s .15s both}
+  .matchmeta{font-family:"Barlow Condensed";font-weight:500;letter-spacing:.05em;color:rgba(255,255,255,.72);font-size:clamp(12px,1.9vmin,19px);opacity:0;animation:fadeDown .7s .25s both}
   .faceoff{display:flex;align-items:center;gap:clamp(20px,5vmin,80px)}
   .faceoff .team{display:flex;flex-direction:column;align-items:center;gap:1.2vmin;width:clamp(160px,26vmin,360px)}
   .faceoff .crest{width:clamp(120px,22vmin,300px);height:clamp(120px,22vmin,300px)}
@@ -159,12 +160,32 @@
   .qrow button.active{background:var(--bronze-2);color:#221200}
   .ctl input[type=text]{font:inherit;padding:14px;border-radius:12px;border:0;background:#11272f;color:#fff;font-size:16px;width:100%}
   .ctl input[type=text]::placeholder{color:#6f8a96}
-  .evpresets{display:flex;flex-wrap:wrap;gap:8px}
-  .evpresets button{font:inherit;cursor:pointer;border:0;border-radius:999px;padding:8px 14px;background:#16323f;color:#cfe2ea;font-size:14px}
+  .evpresets{display:none}
   .evsend{display:flex;gap:10px;align-items:center}
   .evsend button{flex:1;font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:12px;padding:14px;background:#1d3d4a;color:#fff;font-size:15px}
   .evsend select{font:inherit;padding:12px;border-radius:12px;border:0;background:#11272f;color:#fff}
   .evclear button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px;background:#2a2030;color:#e3c7c7;width:100%}
+
+  /* ---- convocados (panel de control) ---- */
+  .roster{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:600px){.roster{grid-template-columns:1fr}}
+  .ros-col{background:#0e2027;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .ros-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .ros-head b{font-family:"Oswald";font-size:15px;letter-spacing:.04em;color:#e7f1f5}
+  .ros-filter{font:inherit;font-size:11px;cursor:pointer;border:0;border-radius:999px;padding:6px 10px;background:#16323f;color:#9fc0cf;white-space:nowrap}
+  .ros-filter.active{background:var(--bronze-2);color:#221200}
+  .ros-list{display:flex;flex-direction:column;gap:6px;max-height:48vh;overflow:auto}
+  .ros-row{display:flex;align-items:center;gap:6px;background:#11272f;border-radius:10px;padding:6px 8px}
+  .ros-dorsal{width:2.4em;flex:0 0 auto;text-align:center;font:inherit;font-weight:700;font-size:13px;border:0;border-radius:8px;padding:6px 0;background:#0a1a20;color:#fff}
+  .ros-dorsal::placeholder{color:#3f5a64}
+  .ros-name{flex:1;min-width:0;font-size:12.5px;color:#dbe9ef;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ros-dots{flex:0 0 auto;display:flex;gap:2px;width:18px}
+  .dot-exp{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e74c3c}
+  .ros-btns{display:flex;gap:4px;flex:0 0 auto}
+  .ros-btns button{font:inherit;font-weight:700;font-size:10.5px;letter-spacing:.02em;cursor:pointer;border:0;border-radius:7px;padding:7px 7px;color:#fff;background:#1d3d4a}
+  .ros-btns button[data-rosev="gol"]{background:var(--bronze-2);color:#221200}
+  .ros-btns button[data-rosev="exp"]{background:#7a2d2d}
+  .ros-btns button[data-rosev="pen"]{background:#264f7a}
 
   @media (prefers-reduced-motion: reduce){*{animation:none !important}}
   @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
@@ -196,6 +217,7 @@
       <div class="caustics"></div><div class="frame"></div>
       <div class="entrada__inner">
         <p class="eyebrow">Partido por el bronce · 3.<sup>er</sup> y 4.<sup>o</sup> puesto</p>
+        <p class="matchmeta" id="e-meta"></p>
         <div class="faceoff">
           <div class="team team--local"><div class="crest" id="e-crest-l"></div><p class="team__name" id="e-name-l"></p><p class="team__city" id="e-city-l"></p></div>
           <div class="vs">VS</div>
@@ -293,7 +315,11 @@
     vhead: val("vhead","¡Vamos, Unión!"),
     vsub:  val("vsub","Seguiremos luchando, porque nos lo merecemos."),
     dhead: val("dhead","Enhorabuena al Club Caballa por la victoria"),
-    dsub:  val("dsub","Gran partido. Orgullosos de los nuestros — seguimos.")
+    dsub:  val("dsub","Gran partido. Orgullosos de los nuestros — seguimos."),
+    mdate: val("mdate","Miércoles 17 de junio"),
+    mtime: val("mtime","19:15h"),
+    mvenue: val("mvenue","P.M. José Laguillo"),
+    lrosterhead: val("lrosterhead","Jerez")
   };
   if(cfg.lc) document.documentElement.style.setProperty("--local", cfg.lc);
   if(cfg.vc) document.documentElement.style.setProperty("--visitor", cfg.vc);
@@ -312,6 +338,7 @@
   smallCrest(byId("sb-cv"),cfg.ve,cfg.vn,cfg.va);
   setText("e-name-l",cfg.ln); setText("e-name-v",cfg.vn);
   setText("e-city-l",cfg.lcity); setText("e-city-v",cfg.vcity);
+  setText("e-meta", cfg.mdate+" · "+cfg.mtime+" · "+cfg.mvenue);
   paintCrest(byId("e-crest-l"),cfg.le,cfg.ln,cfg.la);
   paintCrest(byId("e-crest-v"),cfg.ve,cfg.vn,cfg.va);
   setText("d-name-l",cfg.ln); setText("d-name-v",cfg.vn);
@@ -389,7 +416,57 @@
 
   // ================= PANEL DE CONTROL (iPad) =================
   var VIEWS=[["entrada","Entrada"],["juego","En juego"],["descanso","Descanso"],["victoria","Victoria"],["derrota","Derrota"]];
-  var EVPRESETS=["Gol","Exclusión 2′","Tiempo muerto","Penalti","Gol de penalti"];
+
+  // Convocados (nombre + primer apellido). Jerez = local, Caballa = visitante.
+  var ROSTER_L=["Alberto Miras","Alejandro Garcia","Alfredo Alguacil","Antonio Sanchez","Fernando Espinosa",
+    "Guillermo Marquez","Hector Parro","Ignacio Martin","Javier Salguero","Mariano Gomez",
+    "Miguel Angel Zafra","Miguel Mateos","Miguel Pinto","Pedro Zayas","Pepe De Los Santos",
+    "Rodrigo Ruiz","Samuel Mera","Victor Ruiz","Yago Sanchez"];
+  var ROSTER_V=["Adam El Hachmi","Adan Gonzalez","Alvaro Marin","Ismael Merabet","Jorge Pinazo",
+    "Jose Manuel Cabrera","Luis Guerra","Marco Postigo","Mario Jimenez","Nacho Rodriguez",
+    "Nel López","Nicolas Rodriguez","Nicolas Fernandez","Pablo Canton","Pablo Figueroa",
+    "Rafael Angel Perez","Raul Garcia","Simon Miguel Mari"];
+  var rosterState = {
+    l: ROSTER_L.map(function(n){ return {name:n, dorsal:"", exp:0}; }),
+    v: ROSTER_V.map(function(n){ return {name:n, dorsal:"", exp:0}; })
+  };
+  var rosterFilter = { l:false, v:false };
+  function rosterRow(side, idx, name){
+    return '<div class="ros-row">'+
+      '<input class="ros-dorsal" type="text" inputmode="numeric" maxlength="2" placeholder="–" data-role="dorsal" data-side="'+side+'" data-idx="'+idx+'">'+
+      '<span class="ros-name">'+esc(name)+'</span>'+
+      '<span class="ros-dots" id="dots-'+side+'-'+idx+'"></span>'+
+      '<div class="ros-btns">'+
+        '<button data-rosev="gol" data-side="'+side+'" data-idx="'+idx+'">Gol</button>'+
+        '<button data-rosev="exp" data-side="'+side+'" data-idx="'+idx+'">Exp</button>'+
+        '<button data-rosev="pen" data-side="'+side+'" data-idx="'+idx+'">Pen</button>'+
+      '</div></div>';
+  }
+  function buildRosterCols(){
+    var rowsL = ROSTER_L.map(function(n,i){ return rosterRow("l",i,n); }).join("");
+    var rowsV = ROSTER_V.map(function(n,i){ return rosterRow("v",i,n); }).join("");
+    return '<h2>Convocados</h2><div class="roster">'+
+      '<div class="ros-col"><div class="ros-head"><b>'+esc(cfg.lrosterhead)+'</b><button class="ros-filter" data-rosfilter="l">Solo convocados</button></div>'+
+        '<div class="ros-list" id="ros-list-l">'+rowsL+'</div></div>'+
+      '<div class="ros-col"><div class="ros-head"><b>'+esc(cfg.vshort)+'</b><button class="ros-filter" data-rosfilter="v">Solo convocados</button></div>'+
+        '<div class="ros-list" id="ros-list-v">'+rowsV+'</div></div>'+
+    '</div>';
+  }
+  function renderDots(side,idx){
+    var el=byId("dots-"+side+"-"+idx); if(!el) return;
+    var n=rosterState[side][idx].exp, html="";
+    for(var i=0;i<n;i++) html+='<span class="dot-exp"></span>';
+    el.innerHTML=html;
+  }
+  function applyRosterFilter(side){
+    var list=byId("ros-list-"+side); if(!list) return;
+    var rows=list.querySelectorAll(".ros-row");
+    rows.forEach(function(row,i){
+      var p=rosterState[side][i];
+      row.style.display = (rosterFilter[side] && !p.dorsal) ? "none" : "";
+    });
+  }
+
   function reflectControl(){
     document.querySelectorAll(".views button").forEach(function(b){ b.classList.toggle("active", b.dataset.v===state.view); });
     document.querySelectorAll(".qrow button").forEach(function(b){ b.classList.toggle("active", parseInt(b.dataset.q,10)===state.q); });
@@ -409,11 +486,11 @@
       '<h2>Cuarto</h2><div class="qrow">'+qbtns+'</div>'+
       '<h2>Eventos en directo</h2>'+
       '<input id="ev-input" type="text" placeholder="Texto del evento…" autocomplete="off">'+
-      '<div class="evpresets">'+EVPRESETS.map(function(x){return '<button data-fill="'+esc(x)+'">'+esc(x)+'</button>';}).join("")+'</div>'+
       '<div class="evsend"><button data-ev="l">▶ '+esc(cfg.lshort)+'</button>'+
         '<select id="ev-dur"><option value="6">6 s</option><option value="9">9 s</option><option value="12">12 s</option><option value="0">Fijo</option></select>'+
         '<button data-ev="v">'+esc(cfg.vshort)+' ◀</button></div>'+
-      '<div class="evclear"><button data-evclear="1">Ocultar eventos</button></div>';
+      '<div class="evclear"><button data-evclear="1">Ocultar eventos</button></div>'+
+      buildRosterCols();
 
     byId("ctl").addEventListener("click",function(e){
       var t=e.target;
@@ -422,11 +499,40 @@
       else if(t.dataset.a){ userTouched=true; var a=t.dataset.a;
         if(a==="l+")state.ls++; if(a==="l-")state.ls=Math.max(0,state.ls-1);
         if(a==="v+")state.vs++; if(a==="v-")state.vs=Math.max(0,state.vs-1); commit(); }
-      else if(t.dataset.fill){ var i=byId("ev-input"); if(i) i.value=t.dataset.fill; }
       else if(t.dataset.ev){ var i2=byId("ev-input"); var d=byId("ev-dur");
         var dur=d?parseInt(d.value,10):6; var text=i2?i2.value.trim():"";
         if(text){ publishEvent(t.dataset.ev,text,dur); if(i2) i2.value=""; } }
       else if(t.dataset.evclear){ publishEvent("l","",0); publishEvent("v","",0); }
+      else if(t.dataset.rosev){
+        var rside=t.dataset.side, ridx=parseInt(t.dataset.idx,10);
+        var pl=rosterState[rside][ridx];
+        var tag=pl.dorsal?("#"+pl.dorsal+" "):"";
+        if(t.dataset.rosev==="gol"){
+          userTouched=true;
+          if(rside==="l") state.ls++; else state.vs++;
+          commit();
+          publishEvent(rside, tag+pl.name+" — ¡Gol!", 6);
+        } else if(t.dataset.rosev==="exp"){
+          pl.exp++; renderDots(rside,ridx);
+          publishEvent(rside, tag+pl.name+" — Expulsión", 6);
+        } else if(t.dataset.rosev==="pen"){
+          publishEvent(rside, tag+pl.name+" — Penalti", 6);
+        }
+      }
+      else if(t.dataset.rosfilter){
+        var fside=t.dataset.rosfilter;
+        rosterFilter[fside]=!rosterFilter[fside];
+        t.classList.toggle("active", rosterFilter[fside]);
+        applyRosterFilter(fside);
+      }
+    });
+    byId("ctl").addEventListener("input",function(e){
+      var t=e.target; if(t.dataset.role!=="dorsal") return;
+      var side=t.dataset.side, idx=parseInt(t.dataset.idx,10);
+      var v=t.value.replace(/[^0-9]/g,"").slice(0,2);
+      t.value=v;
+      rosterState[side][idx].dorsal=v;
+      if(rosterFilter[side]) applyRosterFilter(side);
     });
     reflectControl();
   }
