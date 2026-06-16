@@ -612,10 +612,10 @@
           publishRoster(); renderDescansoRoster();
           publishEvent(rside, tag+pl.name+" — ¡Gol!", 6);
         } else if(t.dataset.rosev==="exp"){
-          pl.exp++; renderDots(rside,ridx);
-          publishRoster(); renderDescansoRoster();
+          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Expulsión", 6);
         } else if(t.dataset.rosev==="pen"){
+          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Penalti", 6);
         }
       }
