@@ -212,6 +212,11 @@
   .ros-btns button[data-rosev="exp"]{background:#7a2d2d}
   .ros-btns button[data-rosev="pen"]{background:#264f7a}
 
+  .resetzone{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+  .resetzone__hint{font-size:12px;color:#7f97a1;line-height:1.4}
+  .resetzone__btn{font:inherit;font-weight:700;cursor:pointer;border:2px solid #5a2424;border-radius:12px;padding:14px;background:#241010;color:#ff9a9a;font-size:15px}
+  .resetzone__btn.armed{background:#7a1f1f;color:#fff;border-color:#ff5a5a}
+
   @media (prefers-reduced-motion: reduce){*{animation:none !important}}
   @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
   @keyframes inLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
@@ -450,7 +455,7 @@
   var eventTopic = "wp/"+cfg.match+"/event";
   var rosterTopic = "wp/"+cfg.match+"/roster";
   var clientId = cfg.role+"-"+Math.random().toString(16).slice(2,8);
-  var client=null, connected=false, userTouched=false;
+  var client=null, connected=false, userTouched=false, resetArmTimer=null;
 
   function setStatus(ok){ connected=ok; var d=byId("c-dot"), t=byId("c-txt");
     if(d) d.className="dot"+(ok?" on":""); if(t) t.textContent= ok?"Conectado":"Sin conexión"; }
@@ -580,7 +585,10 @@
         '<select id="ev-dur"><option value="6">6 s</option><option value="9">9 s</option><option value="12">12 s</option><option value="0">Fijo</option></select>'+
         '<button data-ev="v">'+esc(cfg.vshort)+' ◀</button></div>'+
       '<div class="evclear"><button data-evclear="1">Ocultar eventos</button></div>'+
-      buildRosterCols();
+      buildRosterCols()+
+      '<h2>Reiniciar</h2>'+
+      '<div class="resetzone"><p class="resetzone__hint">Pone a 0 el marcador, los cuartos, los convocados y los eventos. Toca dos veces para confirmar.</p>'+
+        '<button class="resetzone__btn" data-reset="1">Reiniciar partido completo</button></div>';
 
     byId("ctl").addEventListener("click",function(e){
       var t=e.target;
@@ -625,6 +633,19 @@
         t.classList.toggle("active", rosterFilter[fside]);
         applyRosterFilter(fside);
       }
+      else if(t.dataset.reset){
+        if(!t.classList.contains("armed")){
+          t.classList.add("armed");
+          t.textContent="¿Seguro? Toca otra vez para reiniciar";
+          clearTimeout(resetArmTimer);
+          resetArmTimer=setTimeout(function(){ t.classList.remove("armed"); t.textContent="Reiniciar partido completo"; }, 4000);
+        } else {
+          clearTimeout(resetArmTimer);
+          t.classList.remove("armed");
+          t.textContent="Reiniciar partido completo";
+          resetAll();
+        }
+      }
     });
     byId("ctl").addEventListener("input",function(e){
       var t=e.target; if(t.dataset.role!=="dorsal") return;
@@ -635,6 +656,30 @@
       if(rosterFilter[side]) applyRosterFilter(side);
     });
     reflectControl();
+  }
+  function resetAll(){
+    userTouched=true;
+    state.view="entrada"; state.ls=0; state.vs=0; state.q=1;
+    state.qp=[null,null,null,null]; state.qsl=0; state.qsv=0;
+
+    document.querySelectorAll(".ros-dorsal").forEach(function(inp){
+      var side=inp.dataset.side, idx=parseInt(inp.dataset.idx,10);
+      inp.value="";
+      if(rosterState[side] && rosterState[side][idx]){
+        rosterState[side][idx].dorsal=""; rosterState[side][idx].goals=0; rosterState[side][idx].exp=0;
+      }
+      renderDots(side, idx);
+    });
+    rosterFilter.l=false; rosterFilter.v=false;
+    document.querySelectorAll(".ros-filter").forEach(function(b){ b.classList.remove("active"); });
+    applyRosterFilter("l"); applyRosterFilter("v");
+
+    var ei=byId("ev-input"); if(ei) ei.value="";
+
+    commit();
+    publishRoster();
+    renderDescansoRoster();
+    publishEvent("l","",0); publishEvent("v","",0);
   }
   function commit(){ applyState(); reflectControl(); publish(); }
 
