@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cartelas Waterpolo · Por el bronce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow+Condensed:wght@500;600&family=Barlow:wght@500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js"></script>
+<style>
+  :root{
+    --pool-deep:#062536; --pool:#0B3F58; --cyan:#25B5D6; --cyan-bright:#5FE0F5;
+    --bronze-1:#9E5F26; --bronze-2:#E0A45A; --bronze-hi:#F8E2BC;
+    --ink:#0C2734; --white:#FFFFFF;
+    --local:#1C3D74; --local-accent:#EE7E1C; --visitor:#171717;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent}
+  body{font-family:"Barlow",system-ui,sans-serif;color:var(--white)}
+  .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+
+  .cartela{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  body[data-view="entrada"] .entrada{display:flex}
+  body[data-view="descanso"] .descanso{display:flex}
+  body[data-view="victoria"] .victoria{display:flex}
+  body[data-view="derrota"] .derrota{display:flex}
+
+  .eyebrow{font-family:"Barlow Condensed";font-weight:600;letter-spacing:.34em;text-transform:uppercase;font-size:clamp(11px,2.1vmin,24px)}
+
+  .crest{display:grid;place-items:center;border-radius:18px;overflow:hidden}
+  .crest img{width:100%;height:100%;object-fit:contain;display:block}
+  .crest--ph{font-family:"Oswald";font-weight:700;color:#fff;border:3px solid rgba(255,255,255,.5);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+
+  /* ===== SCOREBUG (vista juego) ===== */
+  .scorebug{position:absolute;top:clamp(14px,3vh,40px);left:50%;transform:translateX(-50%);
+    display:none;align-items:stretch;font-family:"Oswald";border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 34px rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.18)}
+  body[data-view="juego"] .scorebug{display:flex}
+  .sb__team{display:flex;align-items:center;gap:.5em;padding:.5em .85em;font-weight:600;
+    text-transform:uppercase;letter-spacing:.04em;font-size:clamp(14px,2.4vmin,30px);color:#fff}
+  .sb__team--l{background:linear-gradient(180deg,#274f86,var(--local))}
+  .sb__team--v{background:linear-gradient(180deg,#3a3a3a,var(--visitor));flex-direction:row-reverse}
+  .sb__crest{width:1.7em;height:1.7em;border-radius:5px;display:grid;place-items:center;
+    background:rgba(255,255,255,.14);font-size:.55em;font-weight:700;overflow:hidden}
+  .sb__crest img{width:100%;height:100%;object-fit:contain}
+  .sb__sc{display:flex;align-items:center;gap:.45em;padding:.4em .8em;background:rgba(8,20,28,.94);
+    color:#fff;font-weight:700;font-size:clamp(18px,3vmin,38px);font-variant-numeric:tabular-nums}
+  .sb__sc .dash{color:var(--bronze-2)}
+  .sb__q{display:flex;align-items:center;padding:0 .75em;background:var(--bronze-2);color:#231300;
+    font-weight:700;font-size:clamp(12px,2vmin,24px);letter-spacing:.04em}
+
+  /* ===== ENTRADA ===== */
+  .entrada{background:radial-gradient(120% 90% at 50% -10%, #11597B 0%, var(--pool) 38%, var(--pool-deep) 100%);color:#fff}
+  .caustics{position:absolute;inset:-10%;pointer-events:none;opacity:.5;mix-blend-mode:screen;
+    background:radial-gradient(40% 22% at 22% 18%, rgba(95,224,245,.30), transparent 70%),
+      radial-gradient(34% 20% at 80% 30%, rgba(37,181,214,.26), transparent 70%),
+      radial-gradient(50% 26% at 60% 88%, rgba(95,224,245,.20), transparent 72%);
+    animation:drift 14s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(2%,-2%,0) scale(1.06)}}
+  .entrada__inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(18px,3.4vmin,46px);padding:5vmin}
+  .entrada .eyebrow{color:var(--cyan-bright);opacity:0;animation:fadeDown .7s .15s both}
+  .faceoff{display:flex;align-items:center;gap:clamp(20px,5vmin,80px)}
+  .faceoff .team{display:flex;flex-direction:column;align-items:center;gap:1.2vmin;width:clamp(160px,26vmin,360px)}
+  .faceoff .crest{width:clamp(120px,22vmin,300px);height:clamp(120px,22vmin,300px)}
+  .faceoff .crest--ph{font-size:clamp(34px,6vmin,84px);border-radius:24px}
+  .team--local .crest--ph{background:linear-gradient(160deg,#2a5697,var(--local))}
+  .team--visitor .crest--ph{background:linear-gradient(160deg,#444,var(--visitor))}
+  .team__name{font-family:"Barlow Condensed";font-weight:600;text-transform:uppercase;letter-spacing:.05em;line-height:1.05;font-size:clamp(15px,2.7vmin,30px)}
+  .team__city{font-family:"Barlow";font-weight:500;color:rgba(255,255,255,.66);font-size:clamp(11px,1.8vmin,18px);letter-spacing:.04em}
+  .team--local{animation:inLeft .8s .25s both}
+  .team--visitor{animation:inRight .8s .25s both}
+  .vs{font-family:"Oswald";font-weight:700;font-size:clamp(26px,6vmin,86px);color:var(--bronze-2);line-height:1;text-shadow:0 0 28px rgba(224,164,90,.45);animation:pop .6s .55s both}
+  .cry{font-family:"Oswald";font-weight:700;text-transform:uppercase;font-size:clamp(40px,10.5vmin,150px);line-height:.92;color:#fff;animation:rise .8s .55s both}
+  .cry__bronze{position:relative;background:linear-gradient(180deg,var(--bronze-hi) 8%,var(--bronze-2) 48%,var(--bronze-1) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 18px rgba(158,95,38,.45))}
+  .cry__bronze::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.85) 50%,transparent 62%);-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen;animation:shine 3.6s 1.2s ease-in-out infinite}
+
+  /* ===== DESCANSO ===== */
+  .descanso{background:var(--white);color:var(--ink)}
+  .descanso__inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2.4vmin,30px);padding:4vmin;max-height:100%;animation:rise .6s both}
+  .descanso .eyebrow{color:var(--bronze-1)}
+  .descanso .eyebrow::before,.descanso .eyebrow::after{content:"";display:inline-block;width:clamp(28px,6vmin,80px);height:2px;vertical-align:middle;margin:0 1.2em;background:linear-gradient(90deg,transparent,var(--bronze-2))}
+  .descanso .eyebrow::after{transform:scaleX(-1)}
+  .scoreline{display:flex;align-items:center;justify-content:center;gap:clamp(18px,4.5vmin,70px)}
+  .scoreline .team{display:flex;flex-direction:column;align-items:center;gap:1.4vmin;width:clamp(120px,20vmin,260px)}
+  .scoreline .crest{width:clamp(96px,16vmin,210px);height:clamp(96px,16vmin,210px);border-radius:16px}
+  .scoreline .crest--ph{font-size:clamp(26px,4.4vmin,60px);border-radius:18px}
+  .descanso .team--local .crest--ph{background:linear-gradient(160deg,#2a5697,var(--local));border-color:rgba(255,255,255,.7)}
+  .descanso .team--visitor .crest--ph{background:linear-gradient(160deg,#444,var(--visitor));border-color:rgba(255,255,255,.7)}
+  .descanso .team__name{font-family:"Barlow Condensed";font-weight:600;color:var(--ink);text-transform:uppercase;letter-spacing:.05em;font-size:clamp(15px,2.6vmin,30px)}
+  .score{display:flex;align-items:baseline;gap:clamp(8px,1.8vmin,26px);font-family:"Oswald";font-weight:700;line-height:.86}
+  .score__num{font-size:clamp(76px,22vmin,300px);background:linear-gradient(180deg,#16384a,#0c2734);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+  .score__dash{font-size:clamp(40px,9vmin,120px);color:var(--bronze-2);transform:translateY(-.06em)}
+  .quarter{display:flex;flex-direction:column;align-items:center;gap:1.6vmin}
+  .quarter__label{font-family:"Oswald";font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--ink);font-size:clamp(16px,3vmin,38px)}
+  .pips{display:flex;gap:clamp(8px,1.4vmin,16px)}
+  .pip{width:clamp(14px,2.2vmin,26px);height:clamp(14px,2.2vmin,26px);border-radius:50%;border:2px solid var(--bronze-2);background:transparent}
+  .pip.done{background:linear-gradient(160deg,var(--bronze-2),var(--bronze-1));border-color:var(--bronze-1)}
+
+  /* ===== CIERRE ===== */
+  .cierre__inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.6vmin,32px);padding:5vmin;max-width:92%}
+  .cierre .eyebrow{color:var(--cyan-bright)}
+  .cierre .crest{width:clamp(110px,19vmin,250px);height:clamp(110px,19vmin,250px);border-radius:22px}
+  .cierre .crest--ph{font-size:clamp(28px,4.8vmin,70px);border-radius:24px;border:3px solid rgba(255,255,255,.5)}
+  .cierre__head{font-family:"Oswald";font-weight:700;text-transform:uppercase;line-height:.96;font-size:clamp(34px,8vmin,118px)}
+  .cierre__sub{font-family:"Barlow";font-weight:500;color:rgba(255,255,255,.84);font-size:clamp(15px,2.6vmin,30px);max-width:26ch;line-height:1.32}
+  .finalscore{font-family:"Oswald";font-weight:600;letter-spacing:.03em;font-size:clamp(15px,2.7vmin,34px);color:rgba(255,255,255,.62);display:flex;align-items:center;gap:.55em}
+  .finalscore .ft-num{font-variant-numeric:tabular-nums}
+  .finalscore .dash{color:var(--bronze-2)}
+  .finalscore .win{color:var(--bronze-hi)}
+  .victoria{background:radial-gradient(120% 92% at 50% -10%, #13597B 0%, var(--pool) 40%, var(--pool-deep) 100%);color:#fff}
+  .victoria .crest--ph{background:linear-gradient(160deg,#2a5697,var(--local))}
+  .victoria .cierre__head{animation:rise .7s .3s both}
+  .head-accent{color:var(--local-accent)}
+  .medal{display:flex;flex-direction:column;align-items:center;gap:.8vmin;animation:pop .6s .12s both}
+  .medal__disc{width:clamp(72px,12vmin,140px);height:clamp(72px,12vmin,140px);border-radius:50%;display:grid;place-items:center;font-family:"Oswald";font-weight:700;color:#3a2208;font-size:clamp(26px,4.6vmin,58px);background:radial-gradient(circle at 34% 30%,var(--bronze-hi),var(--bronze-2) 46%,var(--bronze-1) 100%);box-shadow:0 10px 34px rgba(158,95,38,.5),inset 0 2px 6px rgba(255,255,255,.55);border:3px solid rgba(255,255,255,.35)}
+  .medal__cap{font-family:"Barlow Condensed";font-weight:600;letter-spacing:.32em;text-transform:uppercase;font-size:clamp(11px,1.9vmin,20px);color:var(--bronze-hi)}
+  .derrota{background:radial-gradient(120% 92% at 50% -12%, #0F4A66 0%, var(--pool) 44%, var(--pool-deep) 100%);color:#fff}
+  .derrota .crest--ph{background:linear-gradient(160deg,#444,var(--visitor))}
+  .derrota .crest{animation:pop .6s .12s both}
+  .derrota .cierre__head{font-size:clamp(28px,5.4vmin,76px);max-width:20ch;animation:rise .7s .25s both}
+
+  .frame{position:absolute;inset:clamp(14px,2.4vmin,34px);pointer-events:none;z-index:5;border:1.5px solid rgba(224,164,90,.5);border-radius:10px}
+  .descanso .frame{border-color:rgba(158,95,38,.35)}
+
+  /* ===== PANEL DE CONTROL (iPad, role=control) ===== */
+  body.role-control{background:#0a141b;overflow:auto}
+  .ctl{display:none}
+  body.role-control .stage{display:none}
+  body.role-control .ctl{display:flex;flex-direction:column;gap:16px;padding:18px;max-width:780px;margin:0 auto;color:#e7f1f5}
+  .ctl__bar{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#9fc0cf}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#c0392b;margin-right:6px;vertical-align:middle}
+  .dot.on{background:#2ecc71}
+  .ctl h2{font-family:"Oswald";font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7fb0c4;margin:4px 2px}
+  .views{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .views button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:14px;padding:18px 10px;background:#16323f;color:#dbe9ef;font-size:15px}
+  .views button.active{background:var(--bronze-2);color:#221200}
+  .scorectl{display:flex;gap:14px}
+  .scard{flex:1;background:#11272f;border-radius:16px;padding:14px;text-align:center}
+  .scard b{display:block;font-family:"Oswald";font-size:14px;letter-spacing:.05em;margin-bottom:4px;color:#cfe2ea}
+  .scard .n{font-family:"Oswald";font-weight:700;font-size:52px;line-height:1;margin:8px 0}
+  .scard .pm{display:flex;gap:10px;justify-content:center}
+  .scard .pm button{width:60px;height:60px;border-radius:14px;border:0;font-size:28px;font-weight:700;background:#1d3d4a;color:#fff;cursor:pointer}
+  .qrow{display:flex;gap:10px}
+  .qrow button{flex:1;font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:12px;padding:14px;background:#16323f;color:#dbe9ef;font-size:16px}
+  .qrow button.active{background:var(--bronze-2);color:#221200}
+
+  @media (prefers-reduced-motion: reduce){*{animation:none !important}}
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+  @keyframes inLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+  @keyframes inRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+  @keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  @keyframes shine{0%,100%{transform:translateX(-12%)}50%{transform:translateX(12%)}}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <!-- SCOREBUG -->
+    <div class="scorebug">
+      <div class="sb__team sb__team--l"><span class="sb__crest" id="sb-cl"></span><span id="sb-nl">Unión</span></div>
+      <div class="sb__sc"><span id="sb-ls">0</span><span class="dash">–</span><span id="sb-vs">0</span></div>
+      <div class="sb__team sb__team--v"><span class="sb__crest" id="sb-cv"></span><span id="sb-nv">Caballa</span></div>
+      <div class="sb__q" id="sb-q">C1</div>
+    </div>
+
+    <!-- ENTRADA -->
+    <section class="cartela entrada">
+      <div class="caustics"></div><div class="frame"></div>
+      <div class="entrada__inner">
+        <p class="eyebrow">Partido por el bronce · 3.<sup>er</sup> y 4.<sup>o</sup> puesto</p>
+        <div class="faceoff">
+          <div class="team team--local"><div class="crest" id="e-crest-l"></div><p class="team__name" id="e-name-l"></p><p class="team__city" id="e-city-l"></p></div>
+          <div class="vs">VS</div>
+          <div class="team team--visitor"><div class="crest" id="e-crest-v"></div><p class="team__name" id="e-name-v"></p><p class="team__city" id="e-city-v"></p></div>
+        </div>
+        <h1 class="cry">¡Vamos por el <span class="cry__bronze">bronce</span>!</h1>
+      </div>
+    </section>
+
+    <!-- DESCANSO -->
+    <section class="cartela descanso">
+      <div class="frame"></div>
+      <div class="descanso__inner">
+        <p class="eyebrow">Descanso</p>
+        <div class="scoreline">
+          <div class="team team--local"><div class="crest" id="d-crest-l"></div><p class="team__name" id="d-name-l"></p></div>
+          <div class="score"><span class="score__num" id="d-score-l">0</span><span class="score__dash">–</span><span class="score__num" id="d-score-v">0</span></div>
+          <div class="team team--visitor"><div class="crest" id="d-crest-v"></div><p class="team__name" id="d-name-v"></p></div>
+        </div>
+        <div class="quarter"><p class="quarter__label">Cuarto <span id="d-q">1</span></p><div class="pips" id="d-pips"></div></div>
+      </div>
+    </section>
+
+    <!-- VICTORIA -->
+    <section class="cartela victoria cierre">
+      <div class="frame"></div>
+      <div class="cierre__inner">
+        <p class="eyebrow">Final del partido</p>
+        <div class="medal"><div class="medal__disc">3.º</div><div class="medal__cap">Bronce</div></div>
+        <div class="crest" id="w-crest"></div>
+        <h1 class="cierre__head" id="w-head"></h1>
+        <p class="cierre__sub" id="w-sub"></p>
+        <div class="finalscore" id="w-score"></div>
+      </div>
+    </section>
+
+    <!-- DERROTA -->
+    <section class="cartela derrota cierre">
+      <div class="frame"></div>
+      <div class="cierre__inner">
+        <p class="eyebrow">Final del partido</p>
+        <div class="crest" id="l-crest"></div>
+        <h1 class="cierre__head" id="l-head"></h1>
+        <p class="cierre__sub" id="l-sub"></p>
+        <div class="finalscore" id="l-score"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="ctl" id="ctl"></div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  function val(k,d){ var v=p.get(k); return (v===null||v==="")?d:v; }
+  function byId(id){ return document.getElementById(id); }
+  function setText(id,t){ var e=byId(id); if(e) e.textContent=t; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function accentName(text, word){
+    var safe=esc(text); if(!word) return safe;
+    var w=esc(word).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    return safe.replace(new RegExp("("+w+")","gi"),'<span class="head-accent">$1</span>');
+  }
+  function initials(name, fallback){
+    if(fallback) return fallback.toUpperCase().slice(0,3);
+    var words=String(name).replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ ]/g,"").trim().split(/\s+/);
+    if(words.length>=2) return words.slice(0,3).map(function(w){return w[0]}).join("").toUpperCase();
+    return String(name).slice(0,3).toUpperCase();
+  }
+  function paintCrest(el,url,name,abbr){
+    if(!el) return; el.innerHTML="";
+    if(url){ var img=new Image(); img.alt=name; img.src=url;
+      img.onerror=function(){el.classList.add("crest--ph");el.textContent=initials(name,abbr);};
+      el.classList.remove("crest--ph"); el.appendChild(img);
+    } else { el.classList.add("crest--ph"); el.textContent=initials(name,abbr); }
+  }
+  function smallCrest(el,url,name,abbr){
+    if(!el) return;
+    if(url){ el.innerHTML='<img alt="'+esc(name)+'" src="'+esc(url)+'">'; }
+    else { el.textContent=initials(name,abbr); }
+  }
+
+  var cfg = {
+    role:   val("role","overlay"),
+    match:  val("match","uwj-cnc-bronce-2026"),
+    broker: val("broker","wss://broker.emqx.io:8084/mqtt"),
+    ln: val("ln","Unión Waterpolo Jerez"), vn: val("vn","CN Caballa"),
+    lshort: val("lshort","Unión"), vshort: val("vshort","Caballa"),
+    lcity: val("lcity","Jerez de la Frontera"), vcity: val("vcity","Ceuta"),
+    la: val("la",""), va: val("va",""), le: val("le",""), ve: val("ve",""),
+    lc: val("lc",""), vc: val("vc",""),
+    vhead: val("vhead","¡Vamos, Unión!"),
+    vsub:  val("vsub","Seguiremos luchando, porque nos lo merecemos."),
+    dhead: val("dhead","Enhorabuena al Club Caballa por la victoria"),
+    dsub:  val("dsub","Gran partido. Orgullosos de los nuestros — seguimos.")
+  };
+  if(cfg.lc) document.documentElement.style.setProperty("--local", cfg.lc);
+  if(cfg.vc) document.documentElement.style.setProperty("--visitor", cfg.vc);
+
+  // estado compartido por el canal
+  var state = {
+    view: val("view","entrada"),
+    ls: parseInt(val("ls","0"),10)||0,
+    vs: parseInt(val("vs","0"),10)||0,
+    q:  Math.min(4,Math.max(1, parseInt(val("q","1"),10)||1))
+  };
+
+  // ---- pintar contenido estático del overlay ----
+  setText("sb-nl",cfg.lshort); setText("sb-nv",cfg.vshort);
+  smallCrest(byId("sb-cl"),cfg.le,cfg.ln,cfg.la);
+  smallCrest(byId("sb-cv"),cfg.ve,cfg.vn,cfg.va);
+  setText("e-name-l",cfg.ln); setText("e-name-v",cfg.vn);
+  setText("e-city-l",cfg.lcity); setText("e-city-v",cfg.vcity);
+  paintCrest(byId("e-crest-l"),cfg.le,cfg.ln,cfg.la);
+  paintCrest(byId("e-crest-v"),cfg.ve,cfg.vn,cfg.va);
+  setText("d-name-l",cfg.ln); setText("d-name-v",cfg.vn);
+  paintCrest(byId("d-crest-l"),cfg.le,cfg.ln,cfg.la);
+  paintCrest(byId("d-crest-v"),cfg.ve,cfg.vn,cfg.va);
+  paintCrest(byId("w-crest"),cfg.le,cfg.ln,cfg.la);
+  byId("w-head").innerHTML = accentName(cfg.vhead,cfg.lshort);
+  setText("w-sub",cfg.vsub);
+  paintCrest(byId("l-crest"),cfg.ve,cfg.vn,cfg.va);
+  setText("l-head",cfg.dhead);
+  setText("l-sub",cfg.dsub);
+
+  function finalScoreHTML(winner){
+    return '<span'+(winner==="l"?' class="win"':'')+'>'+esc(cfg.lshort)+'</span> '+
+           '<span class="ft-num'+(winner==="l"?" win":"")+'">'+state.ls+'</span>'+
+           '<span class="dash">–</span>'+
+           '<span class="ft-num'+(winner==="v"?" win":"")+'">'+state.vs+'</span> '+
+           '<span'+(winner==="v"?' class="win"':'')+'>'+esc(cfg.vshort)+'</span>';
+  }
+  function applyState(){
+    document.body.setAttribute("data-view", state.view);
+    setText("sb-ls",state.ls); setText("sb-vs",state.vs); setText("sb-q","C"+state.q);
+    setText("d-score-l",state.ls); setText("d-score-v",state.vs); setText("d-q",state.q);
+    var pips=byId("d-pips"); pips.innerHTML="";
+    for(var i=1;i<=4;i++){var dt=document.createElement("span");dt.className="pip"+(i<=state.q?" done":"");pips.appendChild(dt);}
+    byId("w-score").innerHTML=finalScoreHTML("l");
+    byId("l-score").innerHTML=finalScoreHTML("v");
+  }
+  applyState();
+
+  // ================= CANAL EN TIEMPO REAL (MQTT/WSS) =================
+  var topic = "wp/"+cfg.match+"/state";
+  var clientId = cfg.role+"-"+Math.random().toString(16).slice(2,8);
+  var client=null, connected=false, userTouched=false;
+
+  function setStatus(ok){ connected=ok; var d=byId("c-dot"), t=byId("c-txt");
+    if(d) d.className="dot"+(ok?" on":""); if(t) t.textContent= ok?"Conectado":"Sin conexión"; }
+
+  function publish(){
+    if(!client||!connected) return;
+    var msg=JSON.stringify({view:state.view,ls:state.ls,vs:state.vs,q:state.q,cid:clientId,ts:Date.now()});
+    client.publish(topic, msg, {qos:0, retain:true});
+  }
+
+  if(typeof mqtt!=="undefined"){
+    client=mqtt.connect(cfg.broker,{clientId:clientId,reconnectPeriod:2500,connectTimeout:9000,clean:true});
+    client.on("connect",function(){ setStatus(true); client.subscribe(topic,{qos:0}); });
+    client.on("reconnect",function(){ /* reintentando */ });
+    client.on("close",function(){ setStatus(false); });
+    client.on("error",function(){ setStatus(false); });
+    client.on("message",function(t,payload){
+      var s; try{ s=JSON.parse(payload.toString()); }catch(e){ return; }
+      if(s.cid===clientId) return;            // ignora ecos propios
+      if(cfg.role==="control" && userTouched) return; // el mando manda
+      state.view=s.view; state.ls=s.ls; state.vs=s.vs; state.q=s.q;
+      applyState();
+      if(cfg.role==="control") reflectControl();
+    });
+  }
+
+  // ================= PANEL DE CONTROL (iPad) =================
+  var VIEWS=[["entrada","Entrada"],["juego","En juego"],["descanso","Descanso"],["victoria","Victoria"],["derrota","Derrota"]];
+  function reflectControl(){
+    document.querySelectorAll(".views button").forEach(function(b){ b.classList.toggle("active", b.dataset.v===state.view); });
+    document.querySelectorAll(".qrow button").forEach(function(b){ b.classList.toggle("active", parseInt(b.dataset.q,10)===state.q); });
+    var a=byId("ctl-ls"), b=byId("ctl-vs"); if(a)a.textContent=state.ls; if(b)b.textContent=state.vs;
+  }
+  function buildControl(){
+    document.body.classList.add("role-control");
+    var vbtns=VIEWS.map(function(v){return '<button data-v="'+v[0]+'">'+v[1]+'</button>';}).join("");
+    var qbtns=[1,2,3,4].map(function(n){return '<button data-q="'+n+'">'+n+'</button>';}).join("");
+    byId("ctl").innerHTML=
+      '<div class="ctl__bar"><span><span class="dot" id="c-dot"></span><span id="c-txt">Conectando…</span></span><span>'+esc(cfg.match)+'</span></div>'+
+      '<h2>Vista en directo</h2><div class="views">'+vbtns+'</div>'+
+      '<h2>Marcador</h2><div class="scorectl">'+
+        '<div class="scard"><b>'+esc(cfg.lshort)+'</b><div class="n" id="ctl-ls">0</div><div class="pm"><button data-a="l-">−</button><button data-a="l+">+</button></div></div>'+
+        '<div class="scard"><b>'+esc(cfg.vshort)+'</b><div class="n" id="ctl-vs">0</div><div class="pm"><button data-a="v-">−</button><button data-a="v+">+</button></div></div>'+
+      '</div>'+
+      '<h2>Cuarto</h2><div class="qrow">'+qbtns+'</div>';
+
+    byId("ctl").addEventListener("click",function(e){
+      var t=e.target;
+      if(t.dataset.v){ userTouched=true; state.view=t.dataset.v; commit(); }
+      else if(t.dataset.q){ userTouched=true; state.q=parseInt(t.dataset.q,10); commit(); }
+      else if(t.dataset.a){ userTouched=true; var a=t.dataset.a;
+        if(a==="l+")state.ls++; if(a==="l-")state.ls=Math.max(0,state.ls-1);
+        if(a==="v+")state.vs++; if(a==="v-")state.vs=Math.max(0,state.vs-1); commit(); }
+    });
+    reflectControl();
+  }
+  function commit(){ applyState(); reflectControl(); publish(); }
+
+  if(cfg.role==="control") buildControl();
+})();
+</script>
+</body>
+</html>
