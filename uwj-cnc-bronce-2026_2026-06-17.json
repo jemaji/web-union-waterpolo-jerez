@@ -1,0 +1,467 @@
+{
+  "match": "uwj-cnc-bronce-2026",
+  "teams": {
+    "local": "Unión Waterpolo Jerez",
+    "visitor": "CN Caballa"
+  },
+  "date": "Miércoles 17 de junio",
+  "time": "19:15h",
+  "venue": "P.M. José Laguillo",
+  "startTime": "2026-06-17T09:19:27.854Z",
+  "endTime": "2026-06-17T09:19:55.013Z",
+  "finalScore": {
+    "local": 5,
+    "visitor": 3
+  },
+  "roster": {
+    "local": [
+      {
+        "name": "Alberto Miras",
+        "dorsal": "",
+        "goals": 3,
+        "expulsions": 0
+      },
+      {
+        "name": "Alejandro Garcia",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 2
+      },
+      {
+        "name": "Alfredo Alguacil",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Antonio Sanchez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Fernando Espinosa",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Guillermo Marquez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Hector Parro",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Ignacio Martin",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Javier Salguero",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Mariano Gomez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Miguel Angel Zafra",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Miguel Mateos",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Miguel Pinto",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Pedro Zayas",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Pepe De Los Santos",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Rodrigo Ruiz",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Samuel Mera",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Victor Ruiz",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Yago Sanchez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      }
+    ],
+    "visitor": [
+      {
+        "name": "Adam El Hachmi",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Adan Gonzalez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Alvaro Marin",
+        "dorsal": "",
+        "goals": 1,
+        "expulsions": 1
+      },
+      {
+        "name": "Ismael Merabet",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Jorge Pinazo",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Jose Manuel Cabrera",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Luis Guerra",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Marco Postigo",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Mario Jimenez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Nacho Rodriguez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Nel López",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Nicolas Rodriguez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Nicolas Fernandez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Pablo Canton",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Pablo Figueroa",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Rafael Angel Perez",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Raul Garcia",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      },
+      {
+        "name": "Simon Miguel Mari",
+        "dorsal": "",
+        "goals": 0,
+        "expulsions": 0
+      }
+    ]
+  },
+  "events": [
+    {
+      "time": "2026-06-17T09:19:35.827Z",
+      "timestamp": 1781687975827,
+      "type": "score_change",
+      "details": {
+        "team": "local",
+        "from": 0,
+        "to": 1
+      },
+      "state": {
+        "ls": 1,
+        "vs": 0,
+        "view": "descanso",
+        "q": 1
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:36.596Z",
+      "timestamp": 1781687976596,
+      "type": "score_change",
+      "details": {
+        "team": "visitor",
+        "from": 0,
+        "to": 1
+      },
+      "state": {
+        "ls": 1,
+        "vs": 1,
+        "view": "descanso",
+        "q": 1
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:37.965Z",
+      "timestamp": 1781687977965,
+      "type": "quarter_change",
+      "details": {
+        "from": 1,
+        "to": 2,
+        "partial": {
+          "l": 0,
+          "v": 0
+        }
+      },
+      "state": {
+        "ls": 1,
+        "vs": 1,
+        "view": "descanso",
+        "q": 1
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:38.693Z",
+      "timestamp": 1781687978693,
+      "type": "score_change",
+      "details": {
+        "team": "local",
+        "from": 1,
+        "to": 2
+      },
+      "state": {
+        "ls": 2,
+        "vs": 1,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:39.813Z",
+      "timestamp": 1781687979813,
+      "type": "score_change",
+      "details": {
+        "team": "visitor",
+        "from": 1,
+        "to": 2
+      },
+      "state": {
+        "ls": 2,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:44.979Z",
+      "timestamp": 1781687984979,
+      "type": "live_event",
+      "details": {
+        "team": "l",
+        "text": "PRUEBA",
+        "duration": 6
+      },
+      "state": {
+        "ls": 2,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:48.138Z",
+      "timestamp": 1781687988138,
+      "type": "goal",
+      "details": {
+        "team": "l",
+        "player": "Alberto Miras",
+        "dorsal": "",
+        "newGoals": 1
+      },
+      "state": {
+        "ls": 3,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:48.341Z",
+      "timestamp": 1781687988341,
+      "type": "goal",
+      "details": {
+        "team": "l",
+        "player": "Alberto Miras",
+        "dorsal": "",
+        "newGoals": 2
+      },
+      "state": {
+        "ls": 4,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:48.525Z",
+      "timestamp": 1781687988525,
+      "type": "goal",
+      "details": {
+        "team": "l",
+        "player": "Alberto Miras",
+        "dorsal": "",
+        "newGoals": 3
+      },
+      "state": {
+        "ls": 5,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:49.413Z",
+      "timestamp": 1781687989413,
+      "type": "expulsion",
+      "details": {
+        "team": "l",
+        "player": "Alejandro Garcia",
+        "dorsal": "",
+        "type": "button",
+        "newExp": 1
+      },
+      "state": {
+        "ls": 5,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:49.610Z",
+      "timestamp": 1781687989610,
+      "type": "expulsion",
+      "details": {
+        "team": "l",
+        "player": "Alejandro Garcia",
+        "dorsal": "",
+        "type": "button",
+        "newExp": 2
+      },
+      "state": {
+        "ls": 5,
+        "vs": 2,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:50.838Z",
+      "timestamp": 1781687990838,
+      "type": "goal",
+      "details": {
+        "team": "v",
+        "player": "Alvaro Marin",
+        "dorsal": "",
+        "newGoals": 1
+      },
+      "state": {
+        "ls": 5,
+        "vs": 3,
+        "view": "descanso",
+        "q": 2
+      }
+    },
+    {
+      "time": "2026-06-17T09:19:51.697Z",
+      "timestamp": 1781687991697,
+      "type": "expulsion",
+      "details": {
+        "team": "v",
+        "player": "Alvaro Marin",
+        "dorsal": "",
+        "type": "button",
+        "newExp": 1
+      },
+      "state": {
+        "ls": 5,
+        "vs": 3,
+        "view": "descanso",
+        "q": 2
+      }
+    }
+  ]
+}
