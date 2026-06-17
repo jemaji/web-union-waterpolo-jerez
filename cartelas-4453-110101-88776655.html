@@ -409,6 +409,64 @@
     qsl: 0, qsv: 0                // marcador al empezar el cuarto actual (línea base)
   };
 
+  // ================= ALMACENAMIENTO LOCAL Y HISTORIAL =================
+  var STORAGE_KEY = "waterpolo_"+cfg.match+"_data";
+  var partitData = {
+    match: cfg.match,
+    startTime: new Date().toISOString(),
+    state: JSON.parse(JSON.stringify(state)),
+    roster: JSON.parse(JSON.stringify(rosterState)),
+    events: []
+  };
+  
+  // Intentar cargar datos previos
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      var parsed = JSON.parse(saved);
+      partitData = parsed;
+      state = JSON.parse(JSON.stringify(parsed.state));
+      rosterState = JSON.parse(JSON.stringify(parsed.roster));
+    }
+  } catch(e){ /* localStorage no disponible o JSON inválido */ }
+  
+  function savePartitData(){
+    partitData.state = JSON.parse(JSON.stringify(state));
+    partitData.roster = JSON.parse(JSON.stringify(rosterState));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(partitData)); } catch(e){ }
+  }
+  
+  function logEvent(eventType, details){
+    var event = {
+      time: new Date().toISOString(),
+      timestamp: Date.now(),
+      type: eventType,
+      details: details,
+      state: {ls:state.ls, vs:state.vs, view:state.view, q:state.q}
+    };
+    partitData.events.push(event);
+    savePartitData();
+  }
+  
+  function exportJSON(){
+    var exported = {
+      match: cfg.match,
+      teams: {local: cfg.ln, visitor: cfg.vn},
+      date: cfg.mdate,
+      time: cfg.mtime,
+      venue: cfg.mvenue,
+      startTime: partitData.startTime,
+      endTime: new Date().toISOString(),
+      finalScore: {local: state.ls, visitor: state.vs},
+      roster: {
+        local: rosterState.l.map(function(p){ return {name:p.name, dorsal:p.dorsal, goals:p.goals, expulsions:p.exp}; }),
+        visitor: rosterState.v.map(function(p){ return {name:p.name, dorsal:p.dorsal, goals:p.goals, expulsions:p.exp}; })
+      },
+      events: partitData.events
+    };
+    return exported;
+  }
+
   // ---- pintar contenido estático del overlay ----
   setText("sb-nl",cfg.lshort); setText("sb-nv",cfg.vshort);
   smallCrest(byId("sb-cl"),cfg.le,cfg.ln,cfg.la);
@@ -670,25 +728,32 @@
       buildRosterCols()+
       '<h2>Reiniciar</h2>'+
       '<div class="resetzone"><p class="resetzone__hint">Pone a 0 el marcador, los cuartos, los convocados y los eventos. Toca dos veces para confirmar.</p>'+
-        '<button class="resetzone__btn" data-reset="1">Reiniciar partido completo</button></div>';
+        '<button class="resetzone__btn" data-reset="1">Reiniciar partido completo</button></div>'+
+      '<h2>Exportar Datos</h2>'+
+      '<div class="resetzone"><p class="resetzone__hint">Descarga el JSON con todos los eventos, goles, expulsiones y cambios de cartela con hora exacta.</p>'+
+        '<button class="resetzone__btn" data-export="1" style="background:#1a4a3a;border-color:#2a8a6a;color:#7fff7f">Exportar JSON</button></div>';
 
     byId("ctl").addEventListener("click",function(e){
       var t=e.target;
-      if(t.dataset.v){ userTouched=true; state.view=t.dataset.v; commit(); }
+      if(t.dataset.v){ userTouched=true; state.view=t.dataset.v; logEvent("view_change", {view:t.dataset.v}); commit(); }
       else if(t.dataset.q){
         userTouched=true; var newQ=parseInt(t.dataset.q,10);
         if(newQ!==state.q){
           state.qp[state.q-1] = { l: state.ls-state.qsl, v: state.vs-state.qsv };
           state.qsl = state.ls; state.qsv = state.vs;
+          logEvent("quarter_change", {from:state.q, to:newQ, partial:{l:state.ls-state.qsl, v:state.vs-state.qsv}});
         }
         state.q=newQ; commit();
       }
-      else if(t.dataset.a){ userTouched=true; var a=t.dataset.a;
+      else if(t.dataset.a){ userTouched=true; var a=t.dataset.a, oldL=state.ls, oldV=state.vs;
         if(a==="l+")state.ls++; if(a==="l-")state.ls=Math.max(0,state.ls-1);
-        if(a==="v+")state.vs++; if(a==="v-")state.vs=Math.max(0,state.vs-1); commit(); }
+        if(a==="v+")state.vs++; if(a==="v-")state.vs=Math.max(0,state.vs-1);
+        if(oldL!==state.ls) logEvent("score_change", {team:"local", from:oldL, to:state.ls});
+        if(oldV!==state.vs) logEvent("score_change", {team:"visitor", from:oldV, to:state.vs});
+        commit(); }
       else if(t.dataset.ev){ var i2=byId("ev-input"); var d=byId("ev-dur");
         var dur=d?parseInt(d.value,10):6; var text=i2?i2.value.trim():"";
-        if(text){ publishEvent(t.dataset.ev,text,dur); if(i2) i2.value=""; } }
+        if(text){ logEvent("live_event", {team:t.dataset.ev, text:text, duration:dur}); publishEvent(t.dataset.ev,text,dur); if(i2) i2.value=""; } }
       else if(t.dataset.evclear){ publishEvent("l","",0); publishEvent("v","",0); }
       else if(t.dataset.rosev){
         var rside=t.dataset.side, ridx=parseInt(t.dataset.idx,10);
@@ -700,6 +765,7 @@
           userTouched=true;
           pl.goals++;
           if(rside==="l") state.ls++; else state.vs++;
+          logEvent("goal", {team:rside, player:pl.name, dorsal:pl.dorsal, newGoals:pl.goals});
           commit();
           publishRoster(); renderDescansoRoster();
           publishEvent(rside, tag+pl.name+" — ¡Gol!", 6);
@@ -707,28 +773,30 @@
           userTouched=true;
           pl.goals++;
           if(rside==="l") state.ls++; else state.vs++;
+          logEvent("goal_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"add", newGoals:pl.goals});
           commit();
           publishRoster(); renderDescansoRoster();
         } else if(act==="gol-minus"){
           userTouched=true;
           if(pl.goals>0) pl.goals--;
           if(rside==="l") state.ls=Math.max(0,state.ls-1); else state.vs=Math.max(0,state.vs-1);
+          logEvent("goal_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"remove", newGoals:pl.goals});
           commit();
           publishRoster(); renderDescansoRoster();
         } else if(act==="exp"){
-          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp<3){ pl.exp++; logEvent("expulsion", {team:rside, player:pl.name, dorsal:pl.dorsal, type:"button", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Expulsión", 6);
         } else if(act==="exp-plus"){
-          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp<3){ pl.exp++; logEvent("expulsion_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"add", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
         } else if(act==="exp-minus"){
-          if(pl.exp>0){ pl.exp--; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp>0){ pl.exp--; logEvent("expulsion_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"remove", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
         } else if(act==="pen"){
-          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp<3){ pl.exp++; logEvent("penalty", {team:rside, player:pl.name, dorsal:pl.dorsal, type:"button", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Penalti", 6);
         } else if(act==="pen-plus"){
-          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp<3){ pl.exp++; logEvent("penalty_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"add", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
         } else if(act==="pen-minus"){
-          if(pl.exp>0){ pl.exp--; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+          if(pl.exp>0){ pl.exp--; logEvent("penalty_correction", {team:rside, player:pl.name, dorsal:pl.dorsal, action:"remove", newExp:pl.exp}); renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
         }
       }
       else if(t.dataset.rosfilter){
@@ -750,14 +818,30 @@
           resetAll();
         }
       }
+      else if(t.dataset.export){
+        var exported = exportJSON();
+        var dataStr = JSON.stringify(exported, null, 2);
+        var dataBlob = new Blob([dataStr], {type: "application/json"});
+        var url = URL.createObjectURL(dataBlob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = cfg.match + "_" + new Date().toISOString().slice(0,10) + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     });
     byId("ctl").addEventListener("input",function(e){
       var t=e.target; if(t.dataset.role!=="dorsal") return;
       var side=t.dataset.side, idx=parseInt(t.dataset.idx,10);
+      var oldDorsal = rosterState[side][idx].dorsal;
       var v=t.value.replace(/[^0-9]/g,"").slice(0,2);
       t.value=v;
       rosterState[side][idx].dorsal=v;
+      if(v!==oldDorsal) logEvent("dorsal_change", {team:side, player:rosterState[side][idx].name, from:oldDorsal, to:v});
       if(rosterFilter[side]) applyRosterFilter(side);
+      savePartitData();
     });
     reflectControl();
   }
@@ -780,12 +864,13 @@
 
     var ei=byId("ev-input"); if(ei) ei.value="";
 
+    logEvent("reset_all", {});
     commit();
     publishRoster();
     renderDescansoRoster();
     publishEvent("l","",0); publishEvent("v","",0);
   }
-  function commit(){ applyState(); reflectControl(); publish(); }
+  function commit(){ applyState(); reflectControl(); publish(); savePartitData(); }
 
   if(cfg.role==="control") buildControl();
 })();
