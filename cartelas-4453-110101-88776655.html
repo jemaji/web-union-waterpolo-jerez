@@ -585,10 +585,45 @@
   function applyRosterFilter(side){
     var list=byId("ros-list-"+side); if(!list) return;
     var rows=list.querySelectorAll(".ros-row");
-    rows.forEach(function(row,i){
-      var p=rosterState[side][i];
-      row.style.display = (rosterFilter[side] && !p.dorsal) ? "none" : "";
-    });
+    var filtered = [];
+    
+    // Si está activado el filtro, mostrar solo convocados
+    if(rosterFilter[side]){
+      // Recopilar filas con dorsal
+      rows.forEach(function(row,i){
+        var p=rosterState[side][i];
+        if(p.dorsal) filtered.push({row:row, idx:i, dorsal:parseInt(p.dorsal)||0});
+      });
+      // Ordenar por dorsal
+      filtered.sort(function(a,b){ return a.dorsal - b.dorsal; });
+    }
+    
+    // Reorganizar DOM y aplicar visibilidad
+    if(rosterFilter[side] && filtered.length > 0){
+      // Mover filas filtradas al inicio en orden
+      filtered.forEach(function(item){
+        list.insertBefore(item.row, list.firstChild);
+      });
+      
+      // Ocultar no convocados y deshabilitar inputs
+      rows.forEach(function(row,i){
+        var p=rosterState[side][i];
+        var input=row.querySelector(".ros-dorsal");
+        if(!p.dorsal){
+          row.style.display = "none";
+        } else {
+          row.style.display = "";
+          if(input){ input.disabled=true; input.style.opacity="0.5"; input.style.cursor="default"; }
+        }
+      });
+    } else {
+      // Filtro desactivado: mostrar todos y habilitar inputs
+      rows.forEach(function(row,i){
+        row.style.display = "";
+        var input=row.querySelector(".ros-dorsal");
+        if(input){ input.disabled=false; input.style.opacity="1"; input.style.cursor="text"; }
+      });
+    }
   }
   function renderDRSide(side, headLabel){
     var panel=byId("dr-"+side), rowsEl=byId("dr-"+side+"-rows"), headEl=byId("dr-"+side+"-head");
