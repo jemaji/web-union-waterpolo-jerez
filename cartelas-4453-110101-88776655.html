@@ -153,6 +153,15 @@
   .frame{position:absolute;inset:clamp(14px,2.4vmin,34px);pointer-events:none;z-index:5;border:1.5px solid rgba(224,164,90,.5);border-radius:10px}
   .descanso .frame{border-color:rgba(158,95,38,.35)}
 
+  /* ===== FRANJA DE PATROCINADORES (entrada y descanso) ===== */
+  .entrada,.descanso{padding-bottom:clamp(90px,15vmin,170px)}
+  .sponsor-strip{position:absolute;left:clamp(20px,3.4vmin,46px);right:clamp(20px,3.4vmin,46px);
+    bottom:clamp(20px,3.4vmin,46px);height:clamp(48px,7.8vmin,84px);
+    background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    gap:clamp(20px,3.6vmin,46px);padding:0 clamp(16px,2.6vmin,30px);
+    box-shadow:0 8px 26px rgba(0,0,0,.22);z-index:4}
+  .sponsor-strip img{height:62%;width:auto;max-width:30%;object-fit:contain;display:block}
+
   /* ===== EVENTOS EN DIRECTO (vista juego) ===== */
   .events{position:absolute;top:clamp(74px,13vh,150px);left:0;right:0;display:none;justify-content:space-between;gap:12px;padding:0 clamp(18px,5vw,80px);pointer-events:none}
   body[data-view="juego"] .events{display:flex}
@@ -206,11 +215,13 @@
   .ros-name{flex:1;min-width:0;font-size:14.5px;color:#dbe9ef;line-height:1.25;white-space:normal}
   .ros-dots{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:2px;width:20px}
   .dot-exp{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e74c3c}
-  .ros-btns{display:flex;gap:6px;flex:0 0 auto}
+  .ros-btns{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap}
   .ros-btns button{font:inherit;font-weight:700;font-size:12px;letter-spacing:.02em;cursor:pointer;border:0;border-radius:8px;padding:9px 11px;color:#fff;background:#1d3d4a}
   .ros-btns button[data-rosev="gol"]{background:var(--bronze-2);color:#221200}
   .ros-btns button[data-rosev="exp"]{background:#7a2d2d}
   .ros-btns button[data-rosev="pen"]{background:#264f7a}
+  .ros-btns button[data-rosev*="-plus"],.ros-btns button[data-rosev*="-minus"]{background:#466472;font-weight:600;padding:9px 6px;font-size:11px}
+  .ros-btns button[data-rosev*="-plus"]:hover,.ros-btns button[data-rosev*="-minus"]:hover{background:#5a7b8a}
 
   .resetzone{display:flex;flex-direction:column;gap:8px;margin-top:2px}
   .resetzone__hint{font-size:12px;color:#7f97a1;line-height:1.4}
@@ -245,6 +256,7 @@
     <!-- ENTRADA -->
     <section class="cartela entrada">
       <div class="caustics"></div><div class="frame"></div>
+      <div class="sponsor-strip" id="sponsor-entrada"></div>
       <div class="entrada__inner">
         <p class="eyebrow">Partido por el bronce · 3.<sup>er</sup> y 4.<sup>o</sup> puesto</p>
         <p class="matchmeta" id="e-meta"></p>
@@ -262,6 +274,7 @@
       <div class="frame"></div>
       <div class="dr-panel dr-panel--l" id="dr-l"><p class="dr-head" id="dr-l-head"></p><div class="dr-rows" id="dr-l-rows"></div></div>
       <div class="dr-panel dr-panel--v" id="dr-v"><p class="dr-head" id="dr-v-head"></p><div class="dr-rows" id="dr-v-rows"></div></div>
+      <div class="sponsor-strip" id="sponsor-descanso"></div>
       <div class="descanso__inner">
         <p class="eyebrow">Descanso</p>
         <div class="scoreline">
@@ -514,9 +527,21 @@
       '<span class="ros-name">'+esc(name)+'</span>'+
       '<span class="ros-dots" id="dots-'+side+'-'+idx+'"></span>'+
       '<div class="ros-btns">'+
-        '<button data-rosev="gol" data-side="'+side+'" data-idx="'+idx+'">Gol</button>'+
-        '<button data-rosev="exp" data-side="'+side+'" data-idx="'+idx+'">Exp</button>'+
-        '<button data-rosev="pen" data-side="'+side+'" data-idx="'+idx+'">Pen</button>'+
+        '<div style="display:flex;align-items:center;gap:3px">'+
+          '<button data-rosev="gol-minus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">−</button>'+
+          '<button data-rosev="gol" data-side="'+side+'" data-idx="'+idx+'">Gol</button>'+
+          '<button data-rosev="gol-plus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">+</button>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:3px">'+
+          '<button data-rosev="exp-minus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">−</button>'+
+          '<button data-rosev="exp" data-side="'+side+'" data-idx="'+idx+'">Exp</button>'+
+          '<button data-rosev="exp-plus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">+</button>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:3px">'+
+          '<button data-rosev="pen-minus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">−</button>'+
+          '<button data-rosev="pen" data-side="'+side+'" data-idx="'+idx+'">Pen</button>'+
+          '<button data-rosev="pen-plus" data-side="'+side+'" data-idx="'+idx+'" style="padding:9px 6px;font-size:10px">+</button>'+
+        '</div>'+
       '</div></div>';
   }
   function buildRosterCols(){
@@ -612,19 +637,41 @@
         var rside=t.dataset.side, ridx=parseInt(t.dataset.idx,10);
         var pl=rosterState[rside][ridx];
         var tag=pl.dorsal?("#"+pl.dorsal+" "):"";
-        if(t.dataset.rosev==="gol"){
+        var act=t.dataset.rosev;
+        
+        if(act==="gol"){
           userTouched=true;
           pl.goals++;
           if(rside==="l") state.ls++; else state.vs++;
           commit();
           publishRoster(); renderDescansoRoster();
           publishEvent(rside, tag+pl.name+" — ¡Gol!", 6);
-        } else if(t.dataset.rosev==="exp"){
+        } else if(act==="gol-plus"){
+          userTouched=true;
+          pl.goals++;
+          if(rside==="l") state.ls++; else state.vs++;
+          commit();
+          publishRoster(); renderDescansoRoster();
+        } else if(act==="gol-minus"){
+          userTouched=true;
+          if(pl.goals>0) pl.goals--;
+          if(rside==="l") state.ls=Math.max(0,state.ls-1); else state.vs=Math.max(0,state.vs-1);
+          commit();
+          publishRoster(); renderDescansoRoster();
+        } else if(act==="exp"){
           if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Expulsión", 6);
-        } else if(t.dataset.rosev==="pen"){
+        } else if(act==="exp-plus"){
+          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+        } else if(act==="exp-minus"){
+          if(pl.exp>0){ pl.exp--; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+        } else if(act==="pen"){
           if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
           publishEvent(rside, tag+pl.name+" — Penalti", 6);
+        } else if(act==="pen-plus"){
+          if(pl.exp<3){ pl.exp++; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
+        } else if(act==="pen-minus"){
+          if(pl.exp>0){ pl.exp--; renderDots(rside,ridx); publishRoster(); renderDescansoRoster(); }
         }
       }
       else if(t.dataset.rosfilter){
