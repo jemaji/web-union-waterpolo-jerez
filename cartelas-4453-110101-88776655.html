@@ -436,6 +436,21 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(partitData)); } catch(e){ }
   }
   
+  function syncRosterToInputs(){
+    // Sincronizar datos del rosterState a los inputs después de cargar del localStorage
+    document.querySelectorAll(".ros-dorsal").forEach(function(inp){
+      var side = inp.dataset.side;
+      var idx = parseInt(inp.dataset.idx, 10);
+      if(rosterState[side] && rosterState[side][idx]){
+        inp.value = rosterState[side][idx].dorsal || "";
+        renderDots(side, idx);
+      }
+    });
+    
+    // Actualizar UI con los valores del state
+    applyState();
+  }
+  
   function logEvent(eventType, details){
     var event = {
       time: new Date().toISOString(),
@@ -872,7 +887,16 @@
   }
   function commit(){ applyState(); reflectControl(); publish(); savePartitData(); }
 
-  if(cfg.role==="control") buildControl();
+  if(cfg.role==="control") {
+    buildControl();
+    // Pequeño delay para asegurar que el DOM está listo
+    setTimeout(function(){ syncRosterToInputs(); reflectControl(); }, 50);
+    
+    // Guardar datos antes de cerrar/refrescar
+    window.addEventListener("beforeunload", function(e){
+      savePartitData();
+    });
+  }
 })();
 </script>
 </body>
